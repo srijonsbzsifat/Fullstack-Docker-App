@@ -26,7 +26,7 @@ You do **not** need to install Node.js, Vue.js, or MongoDB directly on your mach
 1.  **Clone the repository**:
 
     ```
-    git clone [https://github.com/srijonsbzsifat/Fullstack-Docker-App.git](https://github.com/srijonsbzsifat/Fullstack-Docker-App.git)
+    git clone https://github.com/srijonsbzsifat/Fullstack-Docker-App.git
     cd Fullstack-Docker-App
     ```
 
