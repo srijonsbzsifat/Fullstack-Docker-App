@@ -6,6 +6,8 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+app.get('/health', (_req, res) => res.send('ok')); // quick sanity check
+
 const PORT = 3000;
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/testdb';
 
@@ -20,6 +22,38 @@ const itemSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 const Item = mongoose.model('Item', itemSchema);
+
+app.use((req, res, next) => {
+  const t0 = Date.now();
+  res.on('finish', () => {
+    try {
+      console.log(JSON.stringify({
+        ts: new Date().toISOString(),
+        service: 'backend',
+        event: 'http_request',
+        method: req.method,
+        path: req.originalUrl,
+        status: res.statusCode,
+        duration_ms: Date.now() - t0
+      }));
+    } catch (_) {}
+  });
+  next();
+});
+
+// optional: browser events → Kibana
+app.post('/client-log', (req, res) => {
+  const body = req.body || {};
+  try {
+    console.log(JSON.stringify({
+      ts: new Date().toISOString(),
+      service: 'frontend',
+      via: 'client-log',
+      ...body
+    }));
+  } catch (_) {}
+  res.sendStatus(204);
+});
 
 // --- API Routes ---
 app.get('/api/items', async (req, res) => {
@@ -41,6 +75,22 @@ app.post('/api/items', async (req, res) => {
   } catch (err) {
     res.status(400).json({ message: 'Error adding item' });
   }
+});
+
+app.use((req, res, next) => {
+  const t0 = Date.now();
+  res.on('finish', () => {
+    console.log(JSON.stringify({
+      ts: new Date().toISOString(),
+      service: 'backend',
+      event: 'http_request',
+      method: req.method,
+      path: req.originalUrl,
+      status: res.statusCode,
+      duration_ms: Date.now() - t0
+    }));
+  });
+  next();
 });
 
 app.listen(PORT, () => console.log(`Backend server running on port ${PORT}`));
