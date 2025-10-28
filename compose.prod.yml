@@ -1,0 +1,14 @@
+services:
+  backend:
+    restart: unless-stopped
+    env_file:
+      - ./env/.env.prod
+
+  frontend:
+    restart: unless-stopped
+    env_file:
+      - ./env/.env.prod
+
+  mongodb:
+    restart: unless-stopped
+    # mongo in prod keeps using env.shared values
