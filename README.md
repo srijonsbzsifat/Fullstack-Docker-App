@@ -1,93 +1,145 @@
-# Full-Stack Application with Docker Compose
+# Full-Stack Application with Docker Compose (Multi-Environment Setup)
 
-This project is a simple full-stack application that demonstrates how to containerize a Node.js backend, a Vue.js frontend, and a MongoDB database using Docker and Docker Compose. It provides a simple to-do list-style application, showcasing the power of containerization for creating portable, consistent, and scalable development environments.
+This project is a full-stack application that demonstrates how to containerize a Node.js backend, a Vue.js frontend, and a MongoDB database using **Docker** and **Docker Compose**.  
+It supports separate **development** and **production** environments with simple shell scripts that make it easy to start, stop, or rebuild containers.
+
+---
 
 ## Architecture
 
-The application is composed of three interconnected services, all managed by a single `docker-compose.yml` file:
+The application consists of three core services:
 
-* **`backend`**: A RESTful API built with Node.js, Express.js, and Mongoose. It handles API requests and interacts with the database.
+* **`backend`** – Node.js + Express + Mongoose REST API.  
+* **`frontend`** – Vue.js client that communicates with the backend API.  
+* **`mongodb`** – MongoDB database for persistent data.
 
-* **`frontend`**: A simple web interface built with Vue.js that communicates with the backend API to display and add items.
+These services are defined in multiple Compose files:
 
-* **`mongodb`**: A MongoDB database instance used to persist all application data.
+| File | Purpose |
+|------|----------|
+| `compose.base.yml` | Shared configuration for all environments |
+| `compose.dev.yml` | Development overrides (bind mounts, live reload) |
+| `compose.prod.yml` | Production overrides (immutable containers, restart policies) |
+| `docker-compose.legacy.yml` | The original single-file Compose kept for reference |
+
+---
 
 ## Prerequisites
 
-Before running this application, you need to have the following installed on your machine:
+Install the following before running the project:
 
-* **Git**: For cloning the repository.
-* **Docker Desktop** (or Docker Engine and Docker Compose standalone): Docker Compose is required to manage the multi-container application.
+* **Git** – for cloning the repository  
+* **Docker Desktop** (or Docker Engine + Compose plugin)
 
-You do **not** need to install Node.js, Vue.js, or MongoDB directly on your machine, as they are all handled by Docker.
+> You don’t need Node.js, Vue CLI, or MongoDB installed locally—everything runs in containers.
 
-## Getting Started
+---
 
-1.  **Clone the repository**:
+## Quick Start
 
-    ```
-    git clone https://github.com/srijonsbzsifat/Fullstack-Docker-App.git
-    cd Fullstack-Docker-App
-    ```
+### 1. Clone the repository
+```bash
+git clone https://github.com/srijonsbzsifat/Fullstack-Docker-App.git
+cd Fullstack-Docker-App
+```
 
-2.  **Configure Environment Variables**:
-    This project uses a `.env` file to manage environment variables, particularly for database credentials. Create a file named `.env` in the root directory of the project with the following content:
+### 2. Environment configuration
 
-    ```
-    # MongoDB Configuration
-    MONGO_USERNAME=myuser
-    MONGO_PASSWORD=mypassword
-    MONGO_DATABASE=mydatabase
-    ```
+Environment variables live in the `env/` folder:
 
-    These values are used by the `docker-compose.yml` file to configure the MongoDB and backend services.
+| File | Purpose |
+|------|----------|
+| `env/.env.shared` | common credentials and ports |
+| `env/.env.dev` | development-specific variables |
+| `env/.env.prod` | production-specific variables |
 
-3.  **Build and Run the Containers**:
-    From the root directory of the project, run the following command. The `--build` flag ensures that the backend and frontend images are built from their respective Dockerfiles before the containers are started.
+Example `env/.env.shared`:
+```env
+MONGO_INITDB_ROOT_USERNAME=myuser
+MONGO_INITDB_ROOT_PASSWORD=mypassword
+MONGO_DATABASE=dockerdatabase
+BACKEND_PORT=3000
+FRONTEND_PORT=8080
+```
 
-    ```
-    docker compose up --build
-    ```
+### 3. Run with helper scripts
 
-    The first time you run this, Docker will download the necessary base images and build your application images, which may take a few minutes.
+#### Development (hot-reload)
+```bash
+bash scripts/dev-up.sh
+```
+- Builds all images with development overrides (`compose.base.yml + compose.dev.yml`)  
+- Mounts your local code for instant updates  
+- Runs with `NODE_ENV=development`
 
-4.  **Access the Application**:
-    Once all the services are up and running, you can access the frontend application in your web browser:
+Access:
+- **Frontend:** http://localhost:8080  
+- **Backend:** http://localhost:3000  
 
-    * **Frontend**: `http://localhost:8080`
-    * **Backend API**: `http://localhost:3000`
+To stop containers:
+```bash
+bash scripts/dev-down.sh
+```
 
-    You should see the application's interface and be able to add new items.
+#### Production (immutable deployment)
+```bash
+bash scripts/prod-up.sh
+```
+- Uses production configuration (`compose.base.yml + compose.prod.yml`)  
+- Containers restart automatically on failure  
+- Runs with `NODE_ENV=production`
 
-## Development
+To stop production containers:
+```bash
+bash scripts/prod-down.sh
+```
 
-The `docker-compose.yml` file is configured for a convenient development workflow. It uses **bind mounts** to sync your local code changes with the containers, enabling live reloading.
+> On Windows, run these commands from **Git Bash** or **WSL**.
 
-* Changes you make to the files in `./backend` or `./frontend` will be reflected inside the running containers without needing to rebuild the images.
-* You can stop the containers by pressing `Ctrl + C` in your terminal. To stop and remove all containers and the database volume, use:
+---
 
-    ```
-    docker compose down -v
-    ```
+## Folder Overview
 
-## Project Structure
 ```
 .
-├── backend/
-│   ├── package.json
-│   ├── server.js
-│   └── ...
-├── frontend/
+├── backend/                 # Node.js + Express API
 │   ├── Dockerfile
-│   ├── package.json
-│   ├── src/
-│   │   └── App.vue
-│   └── ...
-├── docker-compose.yml
-├── .env
+│   └── server.js
+├── frontend/                # Vue.js client
+│   └── Dockerfile
+├── env/
+│   ├── .env.shared
+│   ├── .env.dev
+│   └── .env.prod
+├── scripts/                 # Convenience scripts
+│   ├── _compose_common.sh
+│   ├── dev-up.sh
+│   ├── dev-down.sh
+│   ├── dev-build.sh
+│   ├── prod-up.sh
+│   ├── prod-down.sh
+├── compose.base.yml
+├── compose.dev.yml
+├── compose.prod.yml
+├── .dockerignore
+├── docker-compose.legacy.yml   # old single-file compose (kept for reference)
 └── README.md
 ```
 
+---
+
+
+## Cleanup
+
+Remove containers and volumes (e.g., to reset Mongo data):
+
+```bash
+bash scripts/dev-down.sh
+docker volume prune -f
+```
+
+---
+
 ## Credits
 
-This project was built as a demonstration of Docker and Docker Compose for full-stack application development.
+Originally built as a demo of Docker and Docker Compose for full-stack development, now extended with multi-environment support and simple deployment scripts.
