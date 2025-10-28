@@ -57,11 +57,13 @@ export default {
         const response = await axios.get(API_URL);
         this.items = response.data;
         this.error = null;
+        const count = Array.isArray(response.data) ? response.data.length : undefined;
         jlog('items_fetch_succeeded', {
           req_id,
           status: response.status,
-          count: Array.isArray(response.data) ? response.data.length : undefined,
-          duration_ms: Math.round(performance.now() - t0)
+          count: count,
+          duration_ms: Math.round(performance.now() - t0),
+          message: "Successfully fetched " + count + " items."
         });
       } catch (err) {
         this.error = 'Failed to fetch items from the server.';
@@ -89,7 +91,8 @@ export default {
           req_id,
           status: response.status,
           id: response?.data?._id || response?.data?.id,
-          duration_ms: Math.round(performance.now() - t0)
+          duration_ms: Math.round(performance.now() - t0),
+          message: "New Item Created: " + name
         });
         await this.fetchItems();
       } catch (err) {
