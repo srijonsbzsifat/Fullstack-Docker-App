@@ -1,10 +1,23 @@
 filebeat.inputs:
-- type: log
-  enabled: true
-  paths:
-    - /var/log/*.log
- 
-output.logstash:
-  hosts: ["http://localhost:5044"]
-  username: "elastic"
-  password: "elastic"
+  - type: log
+    enabled: true
+    paths:
+      - /var/lib/docker/containers/*/*.log
+    json.keys_under_root: true
+    json.overwrite_keys: true
+    json.add_error_key: true
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+  index: "app-logs-%{+yyyy.MM.dd}"
+
+setup.template.name: "app-logs"
+setup.template.pattern: "app-logs-*"
+setup.ilm.enabled: false
+
+logging.level: info
+logging.to_stderr: true

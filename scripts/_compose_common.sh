@@ -16,10 +16,14 @@ else
   exit 1
 fi
 
-# Compose files & env files
+# Compose files, elk files & env files
 BASE_FILES=(-f compose.base.yml)
 DEV_FILES=("${BASE_FILES[@]}" -f compose.dev.yml)
 PROD_FILES=("${BASE_FILES[@]}" -f compose.prod.yml)
+ELK_FILES=(-f compose.elk.yml)
+
+DEV_ELK_FILES=("${DEV_FILES[@]}" "${ELK_FILES[@]}")
+PROD_ELK_FILES=("${PROD_FILES[@]}" "${ELK_FILES[@]}")
 
 ENV_SHARED=(--env-file env/.env.shared)
 ENV_DEV=("${ENV_SHARED[@]}" --env-file env/.env.dev)
@@ -37,4 +41,12 @@ compose_dev() {
 
 compose_prod() {
   compose "${PROD_FILES[@]}" "${ENV_PROD[@]}" "$@"
+}
+
+compose_dev_elk() {
+  compose "${DEV_ELK_FILES[@]}" "${ENV_DEV[@]}" "$@"
+}
+
+compose_prod_elk() {
+  compose "${PROD_ELK_FILES[@]}" "${ENV_PROD[@]}" "$@"
 }

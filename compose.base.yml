@@ -3,8 +3,11 @@ version: "3.8"
 volumes:
   mongo-data: {}
 
+networks:
+  elk:
+    driver: bridge
+
 services:
-  # -------------------- App stack --------------------
   mongodb:
     image: mongo:latest
     container_name: mongodb
@@ -21,13 +24,15 @@ services:
     env_file:
       - ./env/.env.shared
     environment:
-      # identical to your old compose, just reading from env/.env.shared + env/.env.* at runtime
       MONGO_URI: mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
       NODE_ENV: ${NODE_ENV}
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     depends_on:
       - mongodb
+    networks:
+      - default
+      - elk
 
   frontend:
     build: ./frontend
@@ -40,3 +45,6 @@ services:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
       - backend
+    networks:
+      - default
+      - elk
