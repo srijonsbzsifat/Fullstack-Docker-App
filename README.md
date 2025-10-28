@@ -66,7 +66,7 @@ FRONTEND_PORT=8080
 
 #### Development (hot-reload)
 ```bash
-bash scripts/dev-up.sh
+scripts/dev-up.sh
 ```
 - Builds all images with development overrides (`compose.base.yml + compose.dev.yml`)  
 - Mounts your local code for instant updates  
@@ -78,12 +78,12 @@ Access:
 
 To stop containers:
 ```bash
-bash scripts/dev-down.sh
+scripts/dev-down.sh
 ```
 
 #### Production (immutable deployment)
 ```bash
-bash scripts/prod-up.sh
+scripts/prod-up.sh
 ```
 - Uses production configuration (`compose.base.yml + compose.prod.yml`)  
 - Containers restart automatically on failure  
@@ -91,7 +91,7 @@ bash scripts/prod-up.sh
 
 To stop production containers:
 ```bash
-bash scripts/prod-down.sh
+scripts/prod-down.sh
 ```
 
 > On Windows, run these commands from **Git Bash** or **WSL**.
@@ -134,7 +134,7 @@ bash scripts/prod-down.sh
 Remove containers and volumes (e.g., to reset Mongo data):
 
 ```bash
-bash scripts/dev-down.sh
+scripts/dev-down.sh
 docker volume prune -f
 ```
 
